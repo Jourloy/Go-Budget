@@ -1,14 +1,16 @@
 package impl
 
 import (
+	"net/http"
 	"os"
+
+	"github.com/charmbracelet/log"
+	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 
 	"github.com/Jourloy/Go-Budget-Service/internal/auth"
 	"github.com/Jourloy/Go-Budget-Service/internal/auth/impl/strategy"
 	"github.com/Jourloy/Go-Budget-Service/internal/storage"
-	"github.com/charmbracelet/log"
-	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
 )
 
 type authService struct {
@@ -75,19 +77,19 @@ func (s *authService) GetUserData(c *gin.Context) {
 	a, err := c.Cookie(`access_token`)
 	if err != nil {
 		logger.Error(`failed to get access token`, `err`, err)
-		c.String(400, `failed to get access token`)
+		c.String(http.StatusBadRequest, `failed to get access token`)
 		return
 	}
 	r, err := c.Cookie(`refresh_token`)
 	if err != nil {
 		logger.Error(`failed to get refresh token`, `err`, err)
-		c.String(400, `failed to get refresh token`)
+		c.String(http.StatusBadRequest, `failed to get refresh token`)
 		return
 	}
 
 	if a == `` || r == `` {
 		logger.Error(`failed to get user data`)
-		c.String(400, `failed to get user data`)
+		c.String(http.StatusBadRequest, `failed to get user data`)
 		return
 	}
 
@@ -97,7 +99,7 @@ func (s *authService) GetUserData(c *gin.Context) {
 		return []byte(Secret), nil
 	}); err != nil {
 		logger.Error(`failed to verify access token`, `err`, err)
-		c.String(400, `failed to get user data`)
+		c.String(http.StatusBadRequest, `failed to get user data`)
 		return
 	}
 
@@ -116,7 +118,7 @@ func (s *authService) GetUserData(c *gin.Context) {
 
 	if username == `` || role == `` {
 		logger.Error(`failed to get user data`)
-		c.String(400, `failed to get user data`)
+		c.String(http.StatusBadRequest, `failed to get user data`)
 		return
 	}
 
@@ -124,24 +126,24 @@ func (s *authService) GetUserData(c *gin.Context) {
 	user, err := s.storage.User.GetUserByUsername(username)
 	if err != nil {
 		logger.Error(`failed to get user`, `err`, err)
-		c.String(500, `failed to get user`)
+		c.String(http.StatusInternalServerError, `failed to get user`)
 		return
 	}
 
 	if user == nil || user.Username == `` {
 		logger.Error(`failed to get user data`)
-		c.String(400, `failed to get user data`)
+		c.String(http.StatusBadRequest, `failed to get user data`)
 		return
 	}
 
 	// Add JWT tokens to cookies
 	if err := s.addJWTCookies(UserData{Username: user.Username}, c); err != nil {
 		logger.Error(`failed to add JWT tokens to cookies`, `err`, err)
-		c.String(500, `failed to add JWT tokens to cookies`)
+		c.String(http.StatusInternalServerError, `failed to add JWT tokens to cookies`)
 		return
 	}
 
-	c.JSON(200, gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		`username`: user.Username,
 		`role`:     user.Role,
 	})

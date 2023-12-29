@@ -9,13 +9,14 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
+	"github.com/stretchr/testify/assert"
+
 	"github.com/Jourloy/Go-Budget-Service/internal/storage"
 	budgetM "github.com/Jourloy/Go-Budget-Service/internal/storage/budgets/memory"
 	"github.com/Jourloy/Go-Budget-Service/internal/storage/users"
 	userM "github.com/Jourloy/Go-Budget-Service/internal/storage/users/memory"
-	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestRegisterAuthHandler(t *testing.T) {

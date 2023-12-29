@@ -5,11 +5,12 @@ import (
 	"errors"
 	"os"
 
-	"github.com/Jourloy/Go-Budget-Service/internal/storage/budgets"
-	"github.com/Jourloy/Go-Budget-Service/internal/storage/users"
 	"github.com/charmbracelet/log"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+
+	"github.com/Jourloy/Go-Budget-Service/internal/storage/budgets"
+	"github.com/Jourloy/Go-Budget-Service/internal/storage/users"
 )
 
 type BudgetRepository struct {

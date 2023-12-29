@@ -3,9 +3,10 @@ package memory
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/Jourloy/Go-Budget-Service/internal/storage/budgets"
 	"github.com/Jourloy/Go-Budget-Service/internal/storage/users"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestBudgetMemory_CreateBudget(t *testing.T) {

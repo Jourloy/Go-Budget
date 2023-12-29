@@ -3,9 +3,10 @@ package memory
 import (
 	"sync"
 
+	"github.com/google/uuid"
+
 	"github.com/Jourloy/Go-Budget-Service/internal/storage/budgets"
 	"github.com/Jourloy/Go-Budget-Service/internal/storage/users"
-	"github.com/google/uuid"
 )
 
 type BudgetMemory struct {

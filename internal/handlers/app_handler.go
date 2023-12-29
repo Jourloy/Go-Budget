@@ -1,8 +1,9 @@
 package handlers
 
 import (
-	"github.com/Jourloy/Go-Budget-Service/internal/app"
 	"github.com/gin-gonic/gin"
+
+	"github.com/Jourloy/Go-Budget-Service/internal/app"
 )
 
 func RegisterAppHandler(g *gin.RouterGroup) {

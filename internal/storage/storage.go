@@ -3,10 +3,6 @@ package storage
 import (
 	"os"
 
-	"github.com/Jourloy/Go-Budget-Service/internal/storage/budgets"
-	budgetsRep "github.com/Jourloy/Go-Budget-Service/internal/storage/budgets/postgres"
-	"github.com/Jourloy/Go-Budget-Service/internal/storage/users"
-	usersRep "github.com/Jourloy/Go-Budget-Service/internal/storage/users/postgres"
 	"github.com/charmbracelet/log"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
@@ -14,6 +10,11 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/github"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+
+	"github.com/Jourloy/Go-Budget-Service/internal/storage/budgets"
+	budgetsRep "github.com/Jourloy/Go-Budget-Service/internal/storage/budgets/postgres"
+	"github.com/Jourloy/Go-Budget-Service/internal/storage/users"
+	usersRep "github.com/Jourloy/Go-Budget-Service/internal/storage/users/postgres"
 )
 
 type Storage struct {

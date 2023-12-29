@@ -3,9 +3,10 @@ package memory
 import (
 	"sync"
 
-	"github.com/Jourloy/Go-Budget-Service/internal/storage/users"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
+
+	"github.com/Jourloy/Go-Budget-Service/internal/storage/users"
 )
 
 type UserMemory struct {

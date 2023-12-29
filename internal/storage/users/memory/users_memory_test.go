@@ -3,8 +3,9 @@ package memory
 import (
 	"testing"
 
-	"github.com/Jourloy/Go-Budget-Service/internal/storage/users"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/Jourloy/Go-Budget-Service/internal/storage/users"
 )
 
 func TestUserMemory_CreateUser(t *testing.T) {

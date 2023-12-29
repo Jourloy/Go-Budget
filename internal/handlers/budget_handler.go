@@ -1,10 +1,11 @@
 package handlers
 
 import (
+	"github.com/gin-gonic/gin"
+
 	budgetS "github.com/Jourloy/Go-Budget-Service/internal/budget/impl"
 	spendS "github.com/Jourloy/Go-Budget-Service/internal/spend/impl"
 	"github.com/Jourloy/Go-Budget-Service/internal/storage"
-	"github.com/gin-gonic/gin"
 )
 
 func RegisterBudgetHandler(g *gin.RouterGroup, s *storage.Storage) {

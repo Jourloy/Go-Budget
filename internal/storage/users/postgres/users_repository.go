@@ -5,11 +5,12 @@ import (
 	"errors"
 	"os"
 
-	"github.com/Jourloy/Go-Budget-Service/internal/storage/users"
 	"github.com/charmbracelet/log"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"golang.org/x/crypto/bcrypt"
+
+	"github.com/Jourloy/Go-Budget-Service/internal/storage/users"
 )
 
 var logger = log.NewWithOptions(os.Stderr, log.Options{

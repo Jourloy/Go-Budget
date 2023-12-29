@@ -1,9 +1,10 @@
 package handlers
 
 import (
+	"github.com/gin-gonic/gin"
+
 	"github.com/Jourloy/Go-Budget-Service/internal/auth/impl"
 	"github.com/Jourloy/Go-Budget-Service/internal/storage"
-	"github.com/gin-gonic/gin"
 )
 
 func RegisterAuthHandler(g *gin.RouterGroup, s *storage.Storage) {

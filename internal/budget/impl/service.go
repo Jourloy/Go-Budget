@@ -3,16 +3,18 @@ package impl
 import (
 	"encoding/json"
 	"io"
+	"net/http"
 	"os"
 	"sort"
 	"time"
+
+	"github.com/charmbracelet/log"
+	"github.com/gin-gonic/gin"
 
 	"github.com/Jourloy/Go-Budget-Service/internal/budget"
 	"github.com/Jourloy/Go-Budget-Service/internal/storage"
 	"github.com/Jourloy/Go-Budget-Service/internal/storage/budgets"
 	"github.com/Jourloy/Go-Budget-Service/internal/storage/users"
-	"github.com/charmbracelet/log"
-	"github.com/gin-gonic/gin"
 )
 
 type budgetService struct {
@@ -53,7 +55,7 @@ func (s *budgetService) CreateBudget(c *gin.Context) {
 
 	if body.Name == `` || body.Limit == 0 || body.PeriodLimit == 0 {
 		logger.Error(`body are invalid`)
-		c.String(400, `body are invalid`)
+		c.String(http.StatusBadRequest, `body are invalid`)
 		return
 	}
 
@@ -66,11 +68,11 @@ func (s *budgetService) CreateBudget(c *gin.Context) {
 
 	if err != nil {
 		logger.Error(`failed to create budget`, `err`, err)
-		c.String(500, `failed to create budget`)
+		c.String(http.StatusInternalServerError, `failed to create budget`)
 		return
 	}
 
-	c.String(200, `ok`)
+	c.String(http.StatusOK, `ok`)
 }
 
 type SpendResponse struct {
@@ -124,7 +126,7 @@ func (s *budgetService) GetBudgets(c *gin.Context) {
 		budgetsResponse = append(budgetsResponse, *s.calculateBudget(&budget))
 	}
 
-	c.JSON(200, budgetsResponse)
+	c.JSON(http.StatusOK, budgetsResponse)
 }
 
 func (s *budgetService) calculateBudget(budget *budgets.Budget) *BudgetResponse {
@@ -263,7 +265,7 @@ func (s *budgetService) UpdateBudget(c *gin.Context) {
 	budgetID := c.Param(`id`)
 	if budgetID == `` {
 		logger.Error(`budget id is required`)
-		c.String(400, `budget id is required`)
+		c.String(http.StatusBadRequest, `budget id is required`)
 		return
 	}
 
@@ -278,11 +280,11 @@ func (s *budgetService) UpdateBudget(c *gin.Context) {
 	})
 	if err != nil {
 		logger.Error(`failed to update budget`, `err`, err)
-		c.String(400, `failed to update budget`)
+		c.String(http.StatusBadRequest, `failed to update budget`)
 		return
 	}
 
-	c.String(200, `ok`)
+	c.String(http.StatusOK, `ok`)
 }
 
 func (s *budgetService) ChangeDays(c *gin.Context) {
@@ -298,14 +300,14 @@ func (s *budgetService) ChangeDays(c *gin.Context) {
 	budget := s.storage.Budget.GetBudgetByUserIDAndBudgetID(user.ID, budgetID)
 	if budget == nil {
 		logger.Error(`budget not found`)
-		c.String(404, `budget not found`)
+		c.String(http.StatusNotFound, `budget not found`)
 		return
 	}
 
 	startDate, err := time.Parse(`2006-01-02T15:04:05.9Z`, budget.StartDate)
 	if err != nil {
 		logger.Error(`failed to parse start date`, `err`, err)
-		c.String(500, `failed to parse start date`)
+		c.String(http.StatusInternalServerError, `failed to parse start date`)
 		return
 	}
 
@@ -321,11 +323,11 @@ func (s *budgetService) ChangeDays(c *gin.Context) {
 	err = s.storage.Budget.UpdateBudget(budget)
 	if err != nil {
 		logger.Error(`failed to update budget`, `err`, err)
-		c.String(400, `failed to update budget`)
+		c.String(http.StatusBadRequest, `failed to update budget`)
 		return
 	}
 
-	c.String(200, `ok`)
+	c.String(http.StatusOK, `ok`)
 }
 
 func (s *budgetService) DeleteBudget(c *gin.Context) {
@@ -339,7 +341,7 @@ func (s *budgetService) DeleteBudget(c *gin.Context) {
 	budgetID := c.Param(`id`)
 	if budgetID == `` {
 		logger.Error(`budget id is required`)
-		c.String(400, `budget id is required`)
+		c.String(http.StatusBadRequest, `budget id is required`)
 		return
 	}
 
@@ -347,7 +349,7 @@ func (s *budgetService) DeleteBudget(c *gin.Context) {
 	budget := s.storage.Budget.GetBudgetByUserIDAndBudgetID(user.ID, budgetID)
 	if budget == nil {
 		logger.Error(`budget not found`)
-		c.String(404, `budget not found`)
+		c.String(http.StatusNotFound, `budget not found`)
 		return
 	}
 
@@ -355,11 +357,11 @@ func (s *budgetService) DeleteBudget(c *gin.Context) {
 	err := s.storage.Budget.DeleteBudget(budget)
 	if err != nil {
 		logger.Error(`failed to delete budget`, `err`, err)
-		c.String(500, `failed to delete budget`)
+		c.String(http.StatusInternalServerError, `failed to delete budget`)
 		return
 	}
 
-	c.String(200, `ok`)
+	c.String(http.StatusOK, `ok`)
 }
 
 func (s *budgetService) check(c *gin.Context) (*users.User, bool) {
@@ -367,7 +369,7 @@ func (s *budgetService) check(c *gin.Context) (*users.User, bool) {
 	username, exist := c.Get(`username`)
 	if !exist {
 		logger.Error(`failed to get username`)
-		c.String(403, `failed to get username`)
+		c.String(http.StatusForbidden, `failed to get username`)
 		return nil, false
 	}
 
@@ -375,7 +377,7 @@ func (s *budgetService) check(c *gin.Context) (*users.User, bool) {
 	user, err := s.storage.User.GetUserByUsername(username.(string))
 	if user == nil || err != nil {
 		logger.Error(`failed to get user`)
-		c.String(500, `failed to get user`)
+		c.String(http.StatusInternalServerError, `failed to get user`)
 		return nil, false
 	}
 
@@ -386,7 +388,7 @@ func (s *budgetService) parseBody(c *gin.Context, body interface{}) bool {
 	// Check body
 	if c.Request.Body == nil {
 		logger.Error(`body not found`)
-		c.String(400, `body not found`)
+		c.String(http.StatusBadRequest, `body not found`)
 		return false
 	}
 
@@ -394,14 +396,14 @@ func (s *budgetService) parseBody(c *gin.Context, body interface{}) bool {
 	b, err := io.ReadAll(c.Request.Body)
 	if err != nil {
 		logger.Error(`failed to read body`, `err`, err)
-		c.String(500, `failed to read body`)
+		c.String(http.StatusInternalServerError, `failed to read body`)
 		return false
 	}
 
 	// Unmarshal
 	if err := json.Unmarshal(b, &body); err != nil {
 		logger.Error(`failed to unmarshal body`, `err`, err)
-		c.String(500, `failed to unmarshal body`)
+		c.String(http.StatusInternalServerError, `failed to unmarshal body`)
 		return false
 	}
 

@@ -4,14 +4,16 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"net/http"
 	"os"
 
-	"github.com/Jourloy/Go-Budget-Service/internal/storage"
-	"github.com/Jourloy/Go-Budget-Service/internal/storage/users"
 	"github.com/charmbracelet/log"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
+
+	"github.com/Jourloy/Go-Budget-Service/internal/storage"
+	"github.com/Jourloy/Go-Budget-Service/internal/storage/users"
 )
 
 type LocalStrategy struct {
@@ -63,7 +65,7 @@ func (s *LocalStrategy) Login(c *gin.Context) {
 	ok, err := s.parseBody(c, &body)
 	if !ok || body.Username == `` || body.Password == `` {
 		localLogger.Error(`failed to parse body`, `err`, err)
-		c.String(400, `failed to parse body`)
+		c.String(http.StatusBadRequest, `failed to parse body`)
 		return
 	}
 
@@ -71,7 +73,7 @@ func (s *LocalStrategy) Login(c *gin.Context) {
 	user, err := s.storage.User.GetUserByUsername(body.Username)
 	if err != nil {
 		localLogger.Error(`failed to get user`, `err`, err)
-		c.String(500, `failed to get user`)
+		c.String(http.StatusInternalServerError, `failed to get user`)
 		return
 	}
 
@@ -80,14 +82,14 @@ func (s *LocalStrategy) Login(c *gin.Context) {
 		// Register user
 		if err := s.registerUser(body.Username, body.Password); err != nil {
 			localLogger.Error(`failed to register user`, `err`, err)
-			c.String(500, `failed to register user`)
+			c.String(http.StatusInternalServerError, `failed to register user`)
 			return
 		}
 
 		// Add JWT tokens to cookies
 		if err := s.addJWTCookies(body, c); err != nil {
 			localLogger.Error(`failed to add JWT tokens to cookies`, `err`, err)
-			c.String(500, `failed to add JWT tokens to cookies`)
+			c.String(http.StatusInternalServerError, `failed to add JWT tokens to cookies`)
 			return
 		}
 
@@ -95,7 +97,7 @@ func (s *LocalStrategy) Login(c *gin.Context) {
 		newUser, err := s.storage.User.GetUserByUsername(body.Username)
 		if err != nil {
 			localLogger.Error(`failed to get user`, `err`, err)
-			c.String(500, `failed to get user`)
+			c.String(http.StatusInternalServerError, `failed to get user`)
 			return
 		}
 
@@ -109,7 +111,7 @@ func (s *LocalStrategy) Login(c *gin.Context) {
 		err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(body.Password))
 		if err != nil {
 			localLogger.Error(`invalid credentials`, `err`, err)
-			c.String(403, `invalid credentials`)
+			c.String(http.StatusForbidden, `invalid credentials`)
 			return
 		}
 	}
@@ -117,13 +119,13 @@ func (s *LocalStrategy) Login(c *gin.Context) {
 	// Add JWT tokens to cookies
 	if err := s.addJWTCookies(body, c); err != nil {
 		localLogger.Error(`failed to add JWT tokens to cookies`, `err`, err)
-		c.String(500, `failed to add JWT tokens to cookies`)
+		c.String(http.StatusInternalServerError, `failed to add JWT tokens to cookies`)
 		return
 	}
 
 	localLogger.Debug(`logged in`, `username`, user.Username)
 
-	c.JSON(200, gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		`username`: user.Username,
 		`role`:     user.Role,
 	})
@@ -133,7 +135,7 @@ func (s *LocalStrategy) Register(c *gin.Context) {
 	// Check body
 	if c.Request.Body == nil {
 		localLogger.Error(`body not found`)
-		c.String(400, `body not found`)
+		c.String(http.StatusBadRequest, `body not found`)
 		return
 	}
 
@@ -141,7 +143,7 @@ func (s *LocalStrategy) Register(c *gin.Context) {
 	b, err := io.ReadAll(c.Request.Body)
 	if err != nil {
 		localLogger.Error(`failed to read body`, `err`, err)
-		c.String(500, `failed to read body`)
+		c.String(http.StatusInternalServerError, `failed to read body`)
 		return
 	}
 	defer c.Request.Body.Close()
@@ -150,21 +152,21 @@ func (s *LocalStrategy) Register(c *gin.Context) {
 	var body UserData
 	if err := json.Unmarshal(b, &body); err != nil {
 		localLogger.Error(`failed to unmarshal body`, `err`, err)
-		c.String(500, `failed to unmarshal body`)
+		c.String(http.StatusInternalServerError, `failed to unmarshal body`)
 		return
 	}
 
 	// Register user
 	if err := s.registerUser(body.Username, body.Password); err != nil {
 		localLogger.Error(`failed to register user`, `err`, err)
-		c.String(500, `failed to register user`)
+		c.String(http.StatusInternalServerError, `failed to register user`)
 		return
 	}
 
 	// Add JWT tokens to cookies
 	if err := s.addJWTCookies(body, c); err != nil {
 		localLogger.Error(`failed to add JWT tokens to cookies`, `err`, err)
-		c.String(500, `failed to add JWT tokens to cookies`)
+		c.String(http.StatusInternalServerError, `failed to add JWT tokens to cookies`)
 		return
 	}
 
@@ -172,11 +174,11 @@ func (s *LocalStrategy) Register(c *gin.Context) {
 	newUser, err := s.storage.User.GetUserByUsername(body.Username)
 	if err != nil {
 		localLogger.Error(`failed to get user`, `err`, err)
-		c.String(500, `failed to get user`)
+		c.String(http.StatusInternalServerError, `failed to get user`)
 		return
 	}
 
-	c.JSON(200, gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		`username`: newUser.Username,
 		`role`:     newUser.Role,
 	})

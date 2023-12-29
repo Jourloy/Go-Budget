@@ -1,6 +1,7 @@
 package app
 
 import (
+	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -21,7 +22,7 @@ func CreateAppService() *appService {
 
 // LiveCheck возвращает текущий статус сервера
 func (s *appService) LiveCheck(c *gin.Context) {
-	c.JSON(200, gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		`status`: `OK`,
 		`uptime`: time.Since(startTime) / time.Second,
 	})

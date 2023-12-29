@@ -6,12 +6,13 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/Jourloy/Go-Budget-Service/internal/handlers"
-	"github.com/Jourloy/Go-Budget-Service/internal/middlewares"
-	"github.com/Jourloy/Go-Budget-Service/internal/storage"
 	"github.com/charmbracelet/log"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+
+	"github.com/Jourloy/Go-Budget-Service/internal/handlers"
+	"github.com/Jourloy/Go-Budget-Service/internal/middlewares"
+	"github.com/Jourloy/Go-Budget-Service/internal/storage"
 )
 
 var (
